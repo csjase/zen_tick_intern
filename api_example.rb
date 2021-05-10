@@ -1,26 +1,9 @@
 require 'rubygems'
 require 'httparty'
 require "json"
-require "rest-client"
 require 'pry-byebug'
 require 'base64'
-# url = "https://hacker-news.firebaseio.com/v0/topstories.json"
-# response = RestClient.get(url)
-
-# all_list = JSON.parse(response)
-# # binding.pry
-# posts_id = all_list.first(10)
-# posts_id.each do |post_id|
-#   new_url = "https://hacker-news.firebaseio.com/v0/item/#{post_id}.json"
-#   result = RestClient.get(new_url) # strings
-#   keys = JSON.parse(result) # into hash keys
-#   # puts "#{keys["title"]}, #{keys["url"]}, #{keys["score"]}."
-#   post = Post.new(title: keys["title"], url: keys["url"], votes: keys["score"])
-#   post.save
-# end
-
-# puts "Created #{Post.count} posts!"
-
+require 'dotenv/load'
 
 
 class Ticket
@@ -33,7 +16,7 @@ class Ticket
 end
 
 def aut_header
-  aut_encode = Base64.strict_encode64("jschinsin5@hotmail.com/token:byXiBvfaeJlNxTtjePWZRbiO91cu8qLIch4yMUmU")#{ENV['ZENDESK_API_AUT']}
+  aut_encode = Base64.strict_encode64("#{ENV['ZENDESK_API_AUT']}")
   headers = "Basic #{aut_encode}"
 end
 
@@ -65,11 +48,9 @@ def ticket_choice(ticket_id_to_index, tickets)
   input = gets.chomp.to_i
   ticket_id = input
   index_of_id = ticket_id_to_index[ticket_id]
-  puts tickets[index_of_id].id
-  puts tickets[index_of_id].status
-  puts tickets[index_of_id].subject
+  puts "Ticket # | Status | Subject"
+  puts "#{tickets[index_of_id].id} | #{tickets[index_of_id].status} | #{tickets[index_of_id].subject} "
 end
-
 
 puts "Welcome to the ticket viewer!"
 puts "Type 'menu' to view options or 'quit' to exit"
@@ -88,10 +69,9 @@ input = menu_options
 
 while input != 'quit'
   if input == '1'
+    puts "Ticket # | Status | Subject"
     tickets.each do |ticket|
-      puts ticket.id
-      puts ticket.status
-      puts ticket.subject
+      puts "#{ticket.id} | #{ticket.status[0].capitalize} | #{ticket.subject}"
       puts " "
     end
   elsif input == '2'
