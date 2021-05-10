@@ -1,20 +1,4 @@
-require 'rubygems'
-require 'httparty'
-require "json"
-require 'pry-byebug'
-require 'base64'
-require 'dotenv/load'
-require 'date'
-
-class Ticket
-  attr_reader :id, :status, :subject, :updated_at
-  def initialize(id, status, subject, updated_at)
-    @id = id
-    @status = status
-    @subject = subject
-    @updated_at = updated_at
-  end
-end
+require_relative "app/tickets_view"
 
 def aut_header
   aut_encode = Base64.strict_encode64("#{ENV['ZENDESK_API_AUT']}")
@@ -76,33 +60,3 @@ def all_ticket(tickets)
     puts ""
   end
 end
-
-puts "Welcome to the ticket viewer!"
-puts "Type 'menu' to view options or 'quit' to exit"
-print "> "
-input = gets.chomp.downcase
-
-while input != 'quit' && input != 'menu'  
-  puts "Wrong input, please type 'menu' or 'quit' ONLY"
-  print "> "
-  input = gets.chomp.downcase
-end 
-
-if input == "quit"
-  exit
-end
-
-input = menu_options
-
-while input != 'quit'
-  if input == '1'
-    all_ticket(tickets)
-  elsif input == '2'
-    ticket_choice(ticket_id_to_index, tickets)
-  else
-    puts "Wrong input. Please try again."
-    print "> "
-  end
-  input = menu_options
-end
-
