@@ -66,14 +66,41 @@ def ticket_choice(ticket_id_to_index, tickets)
        "|"       
 end
 
+
 def all_ticket(tickets)
-  puts "-----------------------------------"
-  puts "----------- All Tickets------------"
-  puts "-----------------------------------"
+  puts "-----------------------------------------------------------------------------------------------"
+  puts "---------------------------------------- All Tickets-------------------------------------------"
+  puts "-----------------------------------------------------------------------------------------------"
   puts "|Ticket # | Status | Subject                                                     | Updated At |"
-  tickets.each do |ticket|
-    puts "|   #{ticket.id}     |    #{ticket.status[0].capitalize}    | #{ticket.subject}   | #{ticket.updated_at} |"
-    puts ""
+  ticket_start = 0
+  page_answer = ""
+
+  while page_answer != "menu"
+   
+    tickets.slice(ticket_start, 25).each do |ticket|
+      puts "|   #{ticket.id}     |    #{ticket.status[0].capitalize}    | #{ticket.subject}   | #{ticket.updated_at} |"
+    end
+
+    if ticket_start == 0
+      puts "Please type 'next' for more tickets or 'menu' to go back to main menu."
+      print "> "
+      page_answer = gets.chomp.downcase
+    elsif ticket_start > 0  
+      puts "Please type 'back' for last set of tickets, 'next' for next set of tickets or 'menu' to go back to main menu."
+      print "> "
+      page_answer = gets.chomp.downcase
+      while page_answer != "next" && page_answer != "menu" && page_answer != "back"
+        puts "Wrong input, please input either 'back', 'next' or 'menu'"
+        print "> "
+        page_answer = gets.chomp.downcase
+      end
+    end
+
+    if page_answer == "next"
+      ticket_start += 25 
+    elsif page_answer == "back"
+      ticket_start -= 25 
+    end
   end
 end
 
