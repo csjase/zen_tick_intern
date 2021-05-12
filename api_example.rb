@@ -76,7 +76,6 @@ def all_ticket(tickets)
   page_answer = ""
 
   while page_answer != "menu"
-   
     tickets.slice(ticket_start, 25).each do |ticket|
       puts "|   #{ticket.id}     |    #{ticket.status[0].capitalize}    | #{ticket.subject}   | #{ticket.updated_at} |"
     end
