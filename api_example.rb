@@ -5,6 +5,7 @@ require 'pry-byebug'
 require 'base64'
 require 'dotenv/load'
 require 'date'
+require_relative "zendesk_api"
 
 class Ticket
   attr_reader :id, :status, :subject, :updated_at
@@ -21,21 +22,7 @@ def aut_header
   headers = "Basic #{aut_encode}"
 end
 
-current_index = 0
-ticket_id_to_index = {}
-tickets = []
-response = HTTParty.get('https://zinterntest.zendesk.com/api/v2/requests.json', headers: {"Authorization" => "#{aut_header}"})
-whole_json = JSON.parse(response.body)
-requests_list = whole_json["requests"]
-requests_list.each do |request_item|
-  t = Ticket.new(request_item["id"], 
-                 request_item["status"], 
-                 request_item["subject"],
-                 request_item["updated_at"])
-  tickets << t
-  ticket_id_to_index[request_item["id"]] = current_index #creating a hash map
-  current_index += 1
-end
+
 
 def menu_options
   puts ""
@@ -48,43 +35,53 @@ def menu_options
   input
 end
 
-def ticket_choice(ticket_id_to_index, tickets)
+def ticket_choice
   puts "Enter ticket number: "
   print "> "
   input = gets.chomp.to_i
   ticket_id = input
-  index_of_id = ticket_id_to_index[ticket_id]
+  api = Zendesk_TicketAPI.new('https://zinterntest.zendesk.com/api/v2', aut_header)
+  ticket = api.get_ticket(ticket_id)
   puts "| Ticket #".center(10) +
        "| Status" +
        "| Subject".center(45) +
        "| Updated At".center(30) +
        "|"                                                       
-  puts "|" + "#{tickets[index_of_id].id}".center(9) +
-       "|" + "#{tickets[index_of_id].status.capitalize}".center(8) +
-       "|" + "#{tickets[index_of_id].subject}".center(44) +
-       "|" + "#{tickets[index_of_id].updated_at}".center(10) +
+  puts "|" + "#{ticket.id}".center(9) +
+       "|" + "#{ticket.status.capitalize}".center(8) +
+       "|" + "#{ticket.subject}".center(44) +
+       "|" + "#{ticket.updated_at}".center(10) +
        "|"       
 end
 
 
-def all_ticket(tickets)
+def all_tickets
   puts "-----------------------------------------------------------------------------------------------"
   puts "---------------------------------------- All Tickets-------------------------------------------"
   puts "-----------------------------------------------------------------------------------------------"
   puts "|Ticket # | Status | Subject                                                     | Updated At |"
-  ticket_start = 0
+  # ticket_start = 0
   page_answer = ""
-
+  page = 1
+  per_page = 25
+  api = Zendesk_TicketAPI.new('https://zinterntest.zendesk.com/api/v2', aut_header)
   while page_answer != "menu"
-    tickets.slice(ticket_start, 25).each do |ticket|
-      puts "|   #{ticket.id}     |    #{ticket.status[0].capitalize}    | #{ticket.subject}   | #{ticket.updated_at} |"
+    tickets = api.get_tickets(per_page, page)
+    longest_length = 0
+    tickets.each do |ticket|
+      if ticket.subject.length > longest_length
+        longest_length = ticket.subject.length
+      end  
     end
-
-    if ticket_start == 0
+    tickets.each do |ticket|
+      puts "|   #{ticket.id.to_s.ljust(4)}     |    #{ticket.status[0].capitalize}    | #{ticket.subject.ljust(longest_length)}   | #{ticket.updated_at} |"
+    end
+    
+    if page == 1
       puts "Please type 'next' for more tickets or 'menu' to go back to main menu."
       print "> "
       page_answer = gets.chomp.downcase
-    elsif ticket_start > 0  
+    elsif page > 1  
       puts "Please type 'back' for last set of tickets, 'next' for next set of tickets or 'menu' to go back to main menu."
       print "> "
       page_answer = gets.chomp.downcase
@@ -96,9 +93,9 @@ def all_ticket(tickets)
     end
 
     if page_answer == "next"
-      ticket_start += 25 
+      page += 1
     elsif page_answer == "back"
-      ticket_start -= 25 
+      page -= 1
     end
   end
 end
@@ -122,9 +119,9 @@ input = menu_options
 
 while input != 'quit'
   if input == '1'
-    all_ticket(tickets)
+    all_tickets
   elsif input == '2'
-    ticket_choice(ticket_id_to_index, tickets)
+    ticket_choice
   else
     puts "Wrong input. Please try again."
     print "> "
