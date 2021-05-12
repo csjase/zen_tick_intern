@@ -6,23 +6,14 @@ require 'base64'
 require 'dotenv/load'
 require 'date'
 require_relative "zendesk_api"
-
-class Ticket
-  attr_reader :id, :status, :subject, :updated_at
-  def initialize(id, status, subject, updated_at)
-    @id = id
-    @status = status
-    @subject = subject
-    @updated_at = updated_at
-  end
-end
+require_relative "tickets"
 
 def aut_header
   aut_encode = Base64.strict_encode64("#{ENV['ZENDESK_API_AUT']}")
   headers = "Basic #{aut_encode}"
 end
 
-
+base_url = 'https://zinterntest.zendesk.com/api/v2'
 
 def menu_options
   puts ""
@@ -41,12 +32,8 @@ def ticket_choice
   input = gets.chomp.to_i
   ticket_id = input
   api = Zendesk_TicketAPI.new('https://zinterntest.zendesk.com/api/v2', aut_header)
-  ticket = api.get_ticket(ticket_id)
-  puts "| Ticket #".center(10) +
-       "| Status" +
-       "| Subject".center(45) +
-       "| Updated At".center(30) +
-       "|"                                                       
+  ticket = api.chosen_ticket(ticket_id)
+  puts "| Ticket #| Status |          Subject                           |     Updated At     |"
   puts "|" + "#{ticket.id}".center(9) +
        "|" + "#{ticket.status.capitalize}".center(8) +
        "|" + "#{ticket.subject}".center(44) +
@@ -59,7 +46,7 @@ def all_tickets
   puts "-----------------------------------------------------------------------------------------------"
   puts "---------------------------------------- All Tickets-------------------------------------------"
   puts "-----------------------------------------------------------------------------------------------"
-  puts "|Ticket # | Status | Subject                                                     | Updated At |"
+  puts "|  Ticket #  | Status  |   Subject                                       |      Updated At      |"
   # ticket_start = 0
   page_answer = ""
   page = 1
@@ -71,7 +58,7 @@ def all_tickets
     tickets.each do |ticket|
       if ticket.subject.length > longest_length
         longest_length = ticket.subject.length
-      end  
+      end
     end
     tickets.each do |ticket|
       puts "|   #{ticket.id.to_s.ljust(4)}     |    #{ticket.status[0].capitalize}    | #{ticket.subject.ljust(longest_length)}   | #{ticket.updated_at} |"

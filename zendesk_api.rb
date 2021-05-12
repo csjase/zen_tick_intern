@@ -6,6 +6,14 @@ class Zendesk_TicketAPI
     @tickets = {}
   end
 
+  # def aut_header
+  #   aut_encode = Base64.strict_encode64("#{ENV['ZENDESK_API_AUT']}")
+  #   headers = "Basic #{aut_encode}"
+  # end
+
+  # def new
+  #   api = Zendesk_TicketAPI.new('https://zinterntest.zendesk.com/api/v2', aut_header)
+  # end
   # def get_tickets
   #   current_index = 0
   #   tickets = []
@@ -38,7 +46,7 @@ class Zendesk_TicketAPI
     return tickets
   end
 
-  def get_ticket(id)
+  def chosen_ticket(id)
     response = HTTParty.get("#{@base_url}/tickets/#{id}.json", headers: {"Authorization" => "#{@aut_header}"})
     whole_json = JSON.parse(response.body)
     request_item = whole_json["ticket"]
