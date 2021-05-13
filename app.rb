@@ -1,20 +1,32 @@
-#use Rubys Socket Library
-require 'socket'
+require_relative "tickets_controller"
 
-server = TCPServer.new(3000)
+puts "-----------------------------------------------------------------------------------------------"
+puts "----------------------------- Welcome to Tickets Viewer ---------------------------------------"
+puts "-----------------------------------------------------------------------------------------------"
+puts "Type 'menu' to view options or 'quit' to exit"
+print "> "
+input = gets.chomp.downcase
 
-#Accept incoming connection
-loop do
-  client = server.accept
+while input != 'quit' && input != 'menu'  
+  puts "Wrong input, please type 'menu' or 'quit' ONLY"
+  print "> "
+  input = gets.chomp.downcase
+end 
+
+if input == "quit"
+  exit
 end
-#Get input from client side
 
-client.puts "What's your name?"
-input = client.gets
-puts "Received #{input.chomp} from a client socket 1337"
-client.puts "Hi, #{input.chomp}! You've successfully connected to server socket."
+input = menu_options
 
-#Close the client socket
-puts "Closing client socket"
-client.puts "Goodbye #{input}"
-client.closerub
+while input != 'quit'
+  if input == '1'
+    all_tickets
+  elsif input == '2'
+    ticket_choice
+  else
+    puts "Wrong input. Please try again."
+    print "> "
+  end
+  input = menu_options
+end

@@ -1,24 +1,16 @@
-require_relative "app/tickets_view"
+require 'rubygems'
+require 'httparty'
+require "json"
+require 'pry-byebug'
+require 'base64'
+require 'dotenv/load'
+require 'date'
+require_relative "zendesk_api"
+require_relative "tickets"
 
 def aut_header
   aut_encode = Base64.strict_encode64("#{ENV['ZENDESK_API_AUT']}")
   headers = "Basic #{aut_encode}"
-end
-
-current_index = 0
-ticket_id_to_index = {}
-tickets = []
-response = HTTParty.get('https://zinterntest.zendesk.com/api/v2/requests.json', headers: {"Authorization" => "#{aut_header}"})
-whole_json = JSON.parse(response.body)
-requests_list = whole_json["requests"]
-requests_list.each do |request_item|
-  t = Ticket.new(request_item["id"], 
-                 request_item["status"], 
-                 request_item["subject"],
-                 request_item["updated_at"])
-  tickets << t
-  ticket_id_to_index[request_item["id"]] = current_index #creating a hash map
-  current_index += 1
 end
 
 def menu_options
@@ -32,31 +24,65 @@ def menu_options
   input
 end
 
-def ticket_choice(ticket_id_to_index, tickets)
+def ticket_choice
   puts "Enter ticket number: "
   print "> "
   input = gets.chomp.to_i
   ticket_id = input
-  index_of_id = ticket_id_to_index[ticket_id]
-  puts "| Ticket #".center(10) +
-       "| Status" +
-       "| Subject".center(45) +
-       "| Updated At".center(30) +
-       "|"                                                       
-  puts "|" + "#{tickets[index_of_id].id}".center(9) +
-       "|" + "#{tickets[index_of_id].status.capitalize}".center(8) +
-       "|" + "#{tickets[index_of_id].subject}".center(44) +
-       "|" + "#{tickets[index_of_id].updated_at}".center(10) +
+  api = Zendesk_TicketAPI.new('https://zinterntest.zendesk.com/api/v2', aut_header)
+  ticket = api.chosen_ticket(ticket_id)
+  puts "| Ticket #| Status |          Subject                           |     Updated At     |"
+  puts "|" + "#{ticket.id}".center(9) +
+       "|" + "#{ticket.status.capitalize}".center(8) +
+       "|" + "#{ticket.subject}".center(44) +
+       "|" + "#{ticket.updated_at}".center(10) +
        "|"       
 end
 
-def all_ticket(tickets)
-  puts "-----------------------------------"
-  puts "----------- All Tickets------------"
-  puts "-----------------------------------"
-  puts "|Ticket # | Status | Subject                                                     | Updated At |"
-  tickets.each do |ticket|
-    puts "|   #{ticket.id}     |    #{ticket.status[0].capitalize}    | #{ticket.subject}   | #{ticket.updated_at} |"
-    puts ""
+
+def all_tickets
+  puts "-----------------------------------------------------------------------------------------------"
+  puts "---------------------------------------- All Tickets-------------------------------------------"
+  puts "-----------------------------------------------------------------------------------------------"
+  puts "|  Ticket #  | Status  |   Subject                                       |      Updated At      |"
+  # ticket_start = 0
+  page_answer = ""
+  page = 1
+  per_page = 25
+  api = Zendesk_TicketAPI.new('https://zinterntest.zendesk.com/api/v2', aut_header)
+  while page_answer != "menu"
+    tickets = api.get_tickets(per_page, page)
+    longest_length = 0
+    tickets.each do |ticket|
+      if ticket.subject.length > longest_length
+        longest_length = ticket.subject.length
+      end
+    end
+    tickets.each do |ticket|
+      puts "|   #{ticket.id.to_s.ljust(4)}     |    #{ticket.status[0].capitalize}    | #{ticket.subject.ljust(longest_length)}   | #{ticket.updated_at} |"
+    end
+    
+    if page == 1
+      puts "Please type 'next' for more tickets or 'menu' to go back to main menu."
+      print "> "
+      page_answer = gets.chomp.downcase
+    elsif page > 1  
+      puts "Please type 'back' for last set of tickets, 'next' for next set of tickets or 'menu' to go back to main menu."
+      print "> "
+      page_answer = gets.chomp.downcase
+      while page_answer != "next" && page_answer != "menu" && page_answer != "back"
+        puts "Wrong input, please input either 'back', 'next' or 'menu'"
+        print "> "
+        page_answer = gets.chomp.downcase
+      end
+    end
+
+    if page_answer == "next"
+      page += 1
+    elsif page_answer == "back"
+      page -= 1
+    end
   end
 end
+
+

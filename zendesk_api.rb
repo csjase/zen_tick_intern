@@ -6,30 +6,15 @@ class Zendesk_TicketAPI
     @tickets = {}
   end
 
-  # def aut_header
-  #   aut_encode = Base64.strict_encode64("#{ENV['ZENDESK_API_AUT']}")
-  #   headers = "Basic #{aut_encode}"
-  # end
+  def aut_header
+    aut_encode = Base64.strict_encode64("#{ENV['ZENDESK_API_AUT']}")
+    headers = "Basic #{aut_encode}"
+  end
 
-  # def new
-  #   api = Zendesk_TicketAPI.new('https://zinterntest.zendesk.com/api/v2', aut_header)
-  # end
-  # def get_tickets
-  #   current_index = 0
-  #   tickets = []
-  #   response = HTTParty.get("#{@base_url}/requests.json", headers: {"Authorization" => "#{@aut_header}"})
-  #   whole_json = JSON.parse(response.body)
-  #   requests_list = whole_json["requests"]
-  #   requests_list.each do |request_item|
-  #     t = Ticket.new(request_item["id"], 
-  #                    request_item["status"], 
-  #                    request_item["subject"],
-  #                    request_item["updated_at"])
-  #     tickets << t
-  #     @tickets[request_item["id"]] = current_index #creating a hash map
-  #     current_index += 1
-  #   end
-  # end
+  def new
+    base_url = 'https://zinterntest.zendesk.com/api/v2'
+    api = Zendesk_TicketAPI.new(base_url, aut_header)
+  end
 
   def get_tickets(per_page,page)
     tickets = []
