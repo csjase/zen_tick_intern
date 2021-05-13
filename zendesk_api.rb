@@ -10,12 +10,7 @@ class Zendesk_TicketAPI
     aut_encode = Base64.strict_encode64("#{ENV['ZENDESK_API_AUT']}")
     headers = "Basic #{aut_encode}"
   end
-
-  def new
-    base_url = 'https://zinterntest.zendesk.com/api/v2'
-    api = Zendesk_TicketAPI.new(base_url, aut_header)
-  end
-
+  
   def get_tickets(per_page,page)
     tickets = []
     response = HTTParty.get("#{@base_url}/tickets.json?per_page=#{per_page}&page=#{page}", headers: {"Authorization" => "#{@aut_header}"})

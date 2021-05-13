@@ -1,8 +1,0 @@
-token 2:3OKJs9gUSWsiGsBUMJL1wPk6PAcR48TRo4wxalKr 
-
-token 1:byXiBvfaeJlNxTtjePWZRbiO91cu8qLIch4yMUmU
-
-abc = Base64.strict_encode64('jschinsin5@hotmail.com/token:byXiBvfaeJlNxTtjePWZRbiO91cu8qLIch4yMUmU')
-
-
-
