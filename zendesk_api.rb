@@ -18,7 +18,7 @@ class Zendesk_TicketAPI
     requests_list = whole_json["tickets"]
     requests_list.each do |request_item|
       t = Ticket.new(request_item["id"], 
-                     request_item["status"], 
+                     request_item["status"],
                      request_item["subject"],
                      request_item["updated_at"])
       tickets << t
@@ -31,7 +31,7 @@ class Zendesk_TicketAPI
     whole_json = JSON.parse(response.body)
     request_item = whole_json["ticket"]
     t = Ticket.new(request_item["id"], 
-                   request_item["status"], 
+                   request_item["status"],
                    request_item["subject"],
                    request_item["updated_at"])
     return t
