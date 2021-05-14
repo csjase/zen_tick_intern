@@ -13,7 +13,7 @@ class View
          "|" + "#{ticket.updated_at}".center(10) +
          "|"       
   end
-  
+
   def all_tickets
     puts "-----------------------------------------------------------------------------------------------"
     puts "---------------------------------------- All Tickets-------------------------------------------"
@@ -56,5 +56,13 @@ class View
       elsif page_answer == "back"
         page -= 1
       end
-    end
+    end  
   end
+  
+  private
+  
+  def aut_header
+    aut_encode = Base64.strict_encode64("#{ENV['ZENDESK_API_AUT']}")
+    headers = "Basic #{aut_encode}"
+  end
+end

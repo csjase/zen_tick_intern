@@ -1,4 +1,5 @@
 require_relative "tickets_controller"
+require_relative "tickets_view"
 
 puts "-----------------------------------------------------------------------------------------------"
 puts "----------------------------- Welcome to Tickets Viewer ---------------------------------------"
@@ -21,9 +22,9 @@ input = menu_options
 
 while input != 'quit'
   if input == '1'
-    View.all_tickets
+    all_tickets
   elsif input == '2'
-    View.ticket_choice
+    ticket_choice
   else
     puts "Wrong input. Please try again."
     print "> "
